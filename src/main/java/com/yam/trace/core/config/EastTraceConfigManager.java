@@ -143,7 +143,7 @@ public class EastTraceConfigManager {
 			return;
 		}
 		
-		String className = cls.getName();
+		String className = "^" + cls.getName().replace('.', '/');
 		remove(className, config.getIncludeUserClass());
 		remove(className, config.getIncludeSystemClass());
 		

@@ -10,6 +10,7 @@ package com.yam.trace.core.trace.record;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.yam.trace.core.trace.Share;
 import com.yam.trace.core.util.IOUtil;
 import com.yam.trace.core.util.TraceLogger;
 
@@ -19,6 +20,7 @@ import com.yam.trace.core.util.TraceLogger;
  * @date 2016年1月2日 下午12:42:50
  *
  */
+@Share
 public class FilePerThreadTraceRecord extends AbstractTraceRecord {
 	private static final ThreadLocal<FileOutputStream> FOS = new ThreadLocal<FileOutputStream>() {
 		private FileOutputStream fos;

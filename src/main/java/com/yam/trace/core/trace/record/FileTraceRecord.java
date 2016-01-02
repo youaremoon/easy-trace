@@ -9,8 +9,9 @@ package com.yam.trace.core.trace.record;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.yam.trace.core.trace.Share;
 import com.yam.trace.core.util.IOUtil;
@@ -24,23 +25,27 @@ import com.yam.trace.core.util.TraceLogger;
  */
 @Share
 public class FileTraceRecord extends AbstractTraceRecord {
-	private boolean stop;
+	private volatile boolean stop;
+	private AtomicBoolean started;
 	private Queue<String> msgQueue;
 	private Thread th;
 	private FileOutputStream fos;
 	
 	public FileTraceRecord() {
 		stop = false;
-		msgQueue = new LinkedList<String>();
+		started = new AtomicBoolean(false);
+		msgQueue = new ConcurrentLinkedQueue<String>();
 	}
 	
 	public void stop() {
 		stop = true;
+		th.interrupt();
 		th = null;
+//		started.set(false);
 	}
 	
 	@Override
-	protected synchronized void output(String msg) {
+	protected void output(String msg) {
 		msgQueue.add(msg);
 		
 		initThread();
@@ -68,7 +73,7 @@ public class FileTraceRecord extends AbstractTraceRecord {
 			throw new IllegalStateException("thread is stop!");
 		}
 		
-		if (null != th) {
+		if (started.get() || !started.compareAndSet(false, true)) {
 			return;
 		}
 		
