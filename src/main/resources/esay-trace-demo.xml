@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 类和方法的过滤配置 -->
+	<class-methods>
+		<!-- 排除的系统类 -->
+		<exclude-system-class>
+			<class-method>
+				<class-regex>^java/lang</class-regex>
+			</class-method>
+		</exclude-system-class>
+		<!-- 包括的系统类，优先级高于exclude-system-class -->
+		<include-system-class>
+		</include-system-class>
+		<!-- 排除的用户类，优先级高于include-user-class -->
+		<exclude-user-class>
+		</exclude-user-class>
+		<!-- 包含的用户类 -->
+		<include-user-class>
+			<class-method>
+				<class-regex>^io/netty/</class-regex>
+				<!-- 不配置则所有方法都可以 -->
+				<method-regex></method-regex>
+				<!-- 不配置表示所有点都关注,半角逗号分隔,可以配置的范围: CONSTRUCTOR,METHOD_BEFORE,METHOD_AFTER,STATIC_BEFORE,STATIC_AFTER -->
+				<interst></interst>
+				<!-- 可以将生产的class输出到该目录下,用反编译工具查看: 如D:\\code -->
+				<wirte-file></wirte-file>
+			</class-method>
+		</include-user-class>
+	</class-methods>
+	
+	<!-- trace记录类 -->
+	<trace-records>
+		<!-- 不配置为ConsoleTraceRecord，可以根据情况配置 -->
+		<record-class>com.yam.trace.core.trace.record.ConsoleTraceRecord</record-class>
+		<record-class>com.yam.trace.core.trace.record.FileTraceRecord</record-class>
+		<record-class>com.yam.trace.core.trace.record.FilePerThreadTraceRecord</record-class>
+	</trace-records>
+	
+	<message-filters>
+		<!-- 检测消息的合法性，只能配一项，默认为DefaultMessageCheck -->
+		<message-check>com.yam.trace.core.intercept.DefaultMessageCheck</message-check>
+		<!-- 后面的几个配置可以配置多项，内容为正则表达式,exclude优先级高于include -->
+		<include-thread-name>main</include-thread-name>
+		<exclude-thread-name></exclude-thread-name>
+		<include-message></include-message>
+		<exclude-message></exclude-message>
+	</message-filters>
+</configuration>
