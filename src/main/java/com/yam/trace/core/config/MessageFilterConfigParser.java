@@ -62,7 +62,7 @@ public class MessageFilterConfigParser extends AbstractXmlConfigParser<MessageFi
 				excludeMessage.add(text);
 			} else if (MESSAGE_CHECK.equals(nodeName)) {
 				if (null != config.getMessageCheck()) {
-					TraceLogger.printToConsole("MessageCheck is config as " + config.getMessageCheck().getClass().getName()
+					TraceLogger.printWarnToConsole("MessageCheck is config as " + config.getMessageCheck().getClass().getName()
 							+ ", other config is ignore! className:" + text, true);
 				} else {
 					IMessageCheck mc = create(text);

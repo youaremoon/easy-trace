@@ -13,6 +13,7 @@ import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.yam.trace.core.formatter.MessageFormatter;
 import com.yam.trace.core.trace.record.ConsoleTraceRecord;
 import com.yam.trace.core.trace.record.ITraceRecord;
 
@@ -25,6 +26,8 @@ import com.yam.trace.core.trace.record.ITraceRecord;
 public class TraceRecordConfigParser extends AbstractXmlConfigParser<TraceRecordConfig> {
 	
 	private static final String RECORD_CLASS = "record-class";
+	private static final String RECORD_CLASS_INFO = "record-class-info";
+	private static final String MESSAGE_FORMATTER_CLASS = "message-formatter-class";
 
 	@Override
 	protected TraceRecordConfig doParseToConfig(Node parent) {
@@ -50,6 +53,11 @@ public class TraceRecordConfigParser extends AbstractXmlConfigParser<TraceRecord
 				if (null != record) {
 					recordList.add(record);
 				}
+			} else if (RECORD_CLASS_INFO.equals(nodeName)) {
+				ITraceRecord record = parseRecordClass(node);
+				if (null != record) {
+					recordList.add(record);
+				}
 			}
 		}
 		
@@ -58,6 +66,32 @@ public class TraceRecordConfigParser extends AbstractXmlConfigParser<TraceRecord
 		}
 		
 		return config;
+	}
+	
+	private ITraceRecord parseRecordClass(Node parent) {
+		NodeList nodeList = parent.getChildNodes();
+		int size = nodeList.getLength();
+		if (size == 0) {
+			return null;
+		}
+		
+		ITraceRecord record = null;
+		MessageFormatter<?> messageFormatter = null;
+		for (int i = 0; i < size; i++) {
+			Node node = nodeList.item(i);
+			String nodeName = node.getNodeName();
+			if (RECORD_CLASS.equals(nodeName)) {
+				record = create(getNodeText(node));
+			} else if (MESSAGE_FORMATTER_CLASS.equals(nodeName)) {
+				messageFormatter = create(getNodeText(node));
+			}
+		}
+		
+		if (null != record) {
+			record.setMessageFormatter(messageFormatter);
+		}
+		
+		return record;
 	}
 	
 	@Override

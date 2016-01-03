@@ -33,7 +33,11 @@
 		<!-- 不配置为ConsoleTraceRecord，可以根据情况配置 -->
 		<record-class>com.yam.trace.core.trace.record.ConsoleTraceRecord</record-class>
 		<record-class>com.yam.trace.core.trace.record.FileTraceRecord</record-class>
-		<record-class>com.yam.trace.core.trace.record.FilePerThreadTraceRecord</record-class>
+		<!-- 第二种配置方式,默认的消息格式化类是StringMessageFormatter -->
+		<record-class-info>
+			<record-class>com.yam.trace.core.trace.record.FilePerThreadTraceRecord</record-class>
+			<message-formatter-class>com.yam.trace.core.formatter.StringMessageFormatter</message-formatter-class>
+		</record-class-info>
 	</trace-records>
 	
 	<message-filters>

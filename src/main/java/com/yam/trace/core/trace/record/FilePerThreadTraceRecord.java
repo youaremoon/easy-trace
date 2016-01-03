@@ -44,9 +44,9 @@ public class FilePerThreadTraceRecord extends AbstractTraceRecord {
 	};
 
 	@Override
-	protected void output(String msg) {
+	protected void output(Object msg) {
 		try {
-			FOS.get().write((msg + "\r\n").getBytes("utf-8"));
+			FOS.get().write((msg.toString() + "\r\n").getBytes("utf-8"));
 		} catch (IOException e) {
 			TraceLogger.printToConsole(e);
 		}

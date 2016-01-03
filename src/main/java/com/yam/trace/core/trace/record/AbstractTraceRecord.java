@@ -7,7 +7,8 @@
  */
 package com.yam.trace.core.trace.record;
 
-import com.yam.trace.core.trace.StackDepth;
+import com.yam.trace.core.formatter.MessageFormatter;
+import com.yam.trace.core.formatter.StringMessageFormatter;
 import com.yam.trace.core.util.TraceLogger;
 
 /**
@@ -17,50 +18,46 @@ import com.yam.trace.core.util.TraceLogger;
  *
  */
 public abstract class AbstractTraceRecord implements ITraceRecord {
+	private static final MessageFormatter<String> DEFAULT_FORMATTER = new StringMessageFormatter();
+	private MessageFormatter<?> messageFormatter;
+
+	@Override
+	public MessageFormatter<?> getMessageFormatter() {
+		if (null == messageFormatter) {
+			return DEFAULT_FORMATTER;
+		}
+		
+		return messageFormatter;
+	}
+
+	@Override
+	public void setMessageFormatter(MessageFormatter<?> messageFormatter) {
+		this.messageFormatter = messageFormatter;
+	}
+	
 	@Override
 	public void afterConstructor(Object proxy, Object[] params) {
-		formatAndOutput("new\t" + getIdentity(proxy));
+		output(getMessageFormatter().formatAfterConstructor(proxy, params));
 	}
 
 	@Override
 	public void beforeMethod(Object proxy, String method, Object[] params) {
-		formatAndOutput("begin\t" + getIdentity(proxy) + "." + method);
+		output(getMessageFormatter().formatBeforeMethod(proxy, method, params));
 	}
 
 	@Override
 	public void afterMethod(Object proxy, String method, Object[] params, final Object result) {
-		formatAndOutput("end\t" + getIdentity(proxy) + "." + method + " return " + getIdentity(result));
+		output(getMessageFormatter().formatAfterMethod(proxy, method, params, result));
 	}
 	
 	@Override
 	public void beforeStaticMethod(Class<?> cls, String method, Object[] params) {
-		formatAndOutput("begin\t" + cls.getName() + "." + method);
+		output(getMessageFormatter().formatBeforeStaticMethod(cls, method, params));
 	}
 	
 	@Override
 	public void afterStaticMethod(Class<?> cls, String method, Object[] params, final Object result) {
-		formatAndOutput("end\t" + cls.getName() + "." + method);
-	}
-	
-	protected void formatAndOutput(String msg) {
-		output(format(msg));
-	}
-	
-	protected String format(String msg) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(Thread.currentThread().getName()).append(" ");
-		
-		int depth = StackDepth.getDepth();
-		if (depth > 0) {
-			for (int i = 0; i < depth - 1; i++) {
-				sb.append("--");
-			}
-			sb.append("->");
-		}
-		
-		sb.append(msg);
-		
-		return TraceLogger.getLogInfo(sb.toString());
+		output(getMessageFormatter().formatAfterStaticMethod(cls, method, params, result));
 	}
 	
 	public AbstractTraceRecord clone() {
@@ -73,17 +70,9 @@ public abstract class AbstractTraceRecord implements ITraceRecord {
 		}
 	}
 	
-	protected abstract void output(String msg);
-
-	protected String getIdentity(Object obj) {
-		if (null == obj) {
-			return "null";
-		}
-		
-		if (obj instanceof Class) {
-			return ((Class<?>) obj).getName();
-		} else {
-			return obj.getClass().getName();
-		}
+	protected String toString(Object msg) {
+		return null == msg ? "null" : msg.toString();
 	}
+	
+	protected abstract void output(Object msg);
 }

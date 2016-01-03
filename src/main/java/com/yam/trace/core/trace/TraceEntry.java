@@ -43,8 +43,8 @@ public class TraceEntry {
 		return new TraceEntry();
 	}
 	
-	public void afterConstructor(boolean trace, final Object proxy, final Object[] params) {
-		if (!trace || !checkMessage(proxy, null, params)) {
+	public void afterConstructor(int posId, boolean trace, final Object proxy, final Object[] params) {
+		if (!trace || !checkMessage(posId, proxy, null, params)) {
 			return;
 		}
 		
@@ -56,9 +56,9 @@ public class TraceEntry {
 		});
 	}
 
-	public void beforeMethod(boolean trace, final Object proxy, final String method, final Object[] params) {
-		StackDepth.addDepth();
-		if (!trace || !checkMessage(proxy, method, params)) {
+	public void beforeMethod(int posId, boolean trace, final Object proxy, final String method, final Object[] params) {
+		StackDepth.addCallStack(posId);
+		if (!trace || !checkMessage(posId, proxy, method, params)) {
 			return;
 		}
 		
@@ -70,9 +70,9 @@ public class TraceEntry {
 		});
 	}
 
-	public void afterMethod(boolean trace, final Object proxy, final String method, final Object[] params, final Object result) {
+	public void afterMethod(int posId, boolean trace, final Object proxy, final String method, final Object[] params, final Object result) {
 		try {
-			if (!trace || !checkMessage(proxy, method, params)) {
+			if (!trace || !checkMessage(posId, proxy, method, params)) {
 				return;
 			}
 			
@@ -83,14 +83,14 @@ public class TraceEntry {
 				}
 			});
 		} finally {
-			StackDepth.subDepth();
+			StackDepth.subCallStack(posId);
 		}
 	}
 	
-	public void beforeStaticMethod(boolean trace, final Class<?> cls, final String method, final Object[] params) {
-		StackDepth.addDepth();
+	public void beforeStaticMethod(int posId, boolean trace, final Class<?> cls, final String method, final Object[] params) {
+		StackDepth.addCallStack(posId);
 		
-		if (!trace || !checkMessage(cls, method, params)) {
+		if (!trace || !checkMessage(posId, cls, method, params)) {
 			return;
 		}
 		
@@ -102,9 +102,9 @@ public class TraceEntry {
 		});
 	}
 	
-	public void afterStaticMethod(boolean trace, final Class<?> cls, final String method, final Object[] params, final Object result) {
+	public void afterStaticMethod(int posId, boolean trace, final Class<?> cls, final String method, final Object[] params, final Object result) {
 		try {
-			if (!trace || !checkMessage(cls, method, params)) {
+			if (!trace || !checkMessage(posId, cls, method, params)) {
 				return;
 			}
 			
@@ -115,11 +115,28 @@ public class TraceEntry {
 				}
 			});
 		} finally {
-			StackDepth.subDepth();
+			StackDepth.subCallStack(posId);
 		}
 	}
 	
-	private boolean checkMessage(Object proxy, String method, Object[] params) {
+	/**
+	 * 检查消息是否被过滤，如果过滤则返回false，否则返回true
+	 * @param posId
+	 * @param proxy
+	 * @param method
+	 * @param params
+	 * @return
+	 */
+	private boolean checkMessage(int posId, Object proxy, String method, Object[] params) {
+		if (StackDepth.checkRecurse()) {
+			if (StackDepth.getContinuousRecurseTime() == 1) {
+				TraceLogger.printWarnToConsole("detect direct recursion, end output。 if you want output all, "
+					+ "set jvm param com.yam.trace.CLOSE_STACK_TRACE=true, "
+					+ "or set com.yam.trace.MAX_RECURSE_LEVEL bigger(>8)。", true);
+			}
+			return false;
+		}
+		
 		IMessageCheck check = EastTraceConfigManager.getInstance().getMessageFilterConfig().getMessageCheck();
 		
 		// trace本身的错误导致异常，不能影响程序运行

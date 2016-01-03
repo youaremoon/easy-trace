@@ -24,7 +24,7 @@ public class TraceLogger {
 	};
 	
 	public static void printToConsole(String info, Throwable th) {
-		printToConsole(info, true);
+		printWarnToConsole(info, true);
 		th.printStackTrace();
 	}
 	
@@ -34,6 +34,10 @@ public class TraceLogger {
 	 */
 	public static void printToConsole(String info, boolean addTime) {
 		System.out.println(addTime ? getLogInfo(info) : info);
+	}
+	
+	public static void printWarnToConsole(String info, boolean addTime) {
+		System.err.println(addTime ? getLogInfo(info) : info);
 	}
 	
 	public static void printToConsole(Throwable th) {

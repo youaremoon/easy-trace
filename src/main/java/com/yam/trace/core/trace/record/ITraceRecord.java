@@ -7,6 +7,8 @@
  */
 package com.yam.trace.core.trace.record;
 
+import com.yam.trace.core.formatter.MessageFormatter;
+
 /**
  * @Description: 拦截跟踪
  * @author youaremoon
@@ -14,6 +16,19 @@ package com.yam.trace.core.trace.record;
  *
  */
 public interface ITraceRecord extends Cloneable {
+	
+	/**
+	 * 获取消息格式化实例，帮助对消息进行格式化
+	 * @return
+	 */
+	MessageFormatter<?> getMessageFormatter();
+	
+	/**
+	 * 设置消息格式化实例
+	 * @param messageFormatter
+	 */
+	void setMessageFormatter(MessageFormatter<?> messageFormatter);
+	
 	/**
 	 * 构造方法执行完成后触发
 	 * @param trace

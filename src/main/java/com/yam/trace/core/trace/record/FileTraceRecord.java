@@ -27,14 +27,14 @@ import com.yam.trace.core.util.TraceLogger;
 public class FileTraceRecord extends AbstractTraceRecord {
 	private volatile boolean stop;
 	private AtomicBoolean started;
-	private Queue<String> msgQueue;
+	private Queue<Object> msgQueue;
 	private Thread th;
 	private FileOutputStream fos;
 	
 	public FileTraceRecord() {
 		stop = false;
 		started = new AtomicBoolean(false);
-		msgQueue = new ConcurrentLinkedQueue<String>();
+		msgQueue = new ConcurrentLinkedQueue<Object>();
 	}
 	
 	public void stop() {
@@ -45,7 +45,7 @@ public class FileTraceRecord extends AbstractTraceRecord {
 	}
 	
 	@Override
-	protected void output(String msg) {
+	protected void output(Object msg) {
 		msgQueue.add(msg);
 		
 		initThread();
@@ -55,7 +55,7 @@ public class FileTraceRecord extends AbstractTraceRecord {
 		StringBuilder sb = new StringBuilder();
 		int max = 10;
 		for (int i = 0; i < max; i++) {
-			String msg = msgQueue.poll();
+			Object msg = msgQueue.poll();
 			if (null == msg) {
 				break;
 			}
@@ -84,7 +84,7 @@ public class FileTraceRecord extends AbstractTraceRecord {
 					try {
 						doWork();
 						// sleep久了肉眼就能看出来了 -，-
-						Thread.sleep(100);
+						Thread.sleep(10);
 					} catch (Exception ex) {
 						TraceLogger.printToConsole(ex);
 					}
@@ -102,6 +102,7 @@ public class FileTraceRecord extends AbstractTraceRecord {
 				}
 			}
 		});
+		th.setDaemon(true);
 		th.start();
 	}
 }

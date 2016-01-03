@@ -72,7 +72,7 @@ public class EastTraceConfigManager {
 		String configPath = System.getProperty(SYSTEM_CONFIG_PATH_PARAM, ESAY_TRACE_XML);
 		InputStream is = ClassMethodsConfig.class.getResourceAsStream(configPath);
 		if (null == is) {
-			TraceLogger.printToConsole("cannot find config file: " + configPath + ", use default config.", true);
+			TraceLogger.printWarnToConsole("cannot find config file: " + configPath + ", use default config.", true);
 			return;
 		}
 		
@@ -147,8 +147,7 @@ public class EastTraceConfigManager {
 		remove(className, config.getIncludeUserClass());
 		remove(className, config.getIncludeSystemClass());
 		
-		String packName = "^" + cls.getPackage().getName().replace('.', '/');
-		add(packName, config.getExcludeSystemClass());
+		add(className, config.getExcludeSystemClass());
 	}
 	
 	private static void remove(String exp, List<ClassMethodConfig> expList) {

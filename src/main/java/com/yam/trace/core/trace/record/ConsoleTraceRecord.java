@@ -19,7 +19,7 @@ import com.yam.trace.core.util.TraceLogger;
 @Share
 public class ConsoleTraceRecord extends AbstractTraceRecord {
 	@Override
-	protected void output(String msg) {
-		TraceLogger.printToConsole(msg, false);
+	protected void output(Object msg) {
+		TraceLogger.printToConsole(toString(msg), false);
 	}
 }
