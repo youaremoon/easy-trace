@@ -146,7 +146,7 @@ public class ByteCodeProxy implements IInterceptProxy {
 			
 //			cc.insertBefore(createInterceptCall(cc, InterceptEntry.INTERCEPT_CONSTRUCTOR_BEFORE_PREFIX, false, true));
 			cc.insertAfter(createInterceptCall(cc, INSTANCE_METHOD_NAME + "()." + TraceEntry.TRACE_CONSTRUCTOR_AFTER_PREFIX, 
-					ProxyUtil.newPosId(), true, false, false, false));
+					ProxyUtil.newPosId(), true, false, false, false), true);
 			
 			intercept = true;
 		}
