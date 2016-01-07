@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.security.ProtectionDomain;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -20,7 +19,6 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
-import javassist.LoaderClassPath;
 import javassist.Modifier;
 import javassist.NotFoundException;
 
@@ -55,28 +53,13 @@ public class ByteCodeProxy implements IInterceptProxy {
 		EXCLUDE_METHODS.add("notifyAll");
 		EXCLUDE_METHODS.add(INSTANCE_METHOD_NAME);
 	}
-	private static ConcurrentHashMap<ClassLoader, ClassPool> CLASS_POOL_MAP = new ConcurrentHashMap<ClassLoader, ClassPool>();
-	
-	private static ClassPool getClassPool(ClassLoader loader) {
-		if (null == loader) {
-			return ClassPool.getDefault();
-		}
-		
-		ClassPool pool = CLASS_POOL_MAP.get(loader);
-		if (null == pool) {
-			pool = new ClassPool(true);
-			pool.appendClassPath(new LoaderClassPath(loader));
-			CLASS_POOL_MAP.put(loader, pool);
-		}
-		return pool;
-	}
 	
 	/**
 	 * 根据配置信息为类生成代理
 	 */
 	@Override
 	public byte[] proxyFor(ClassLoader loader, ProtectionDomain protectionDomain, String className, byte[] classfileBuffer, ClassMethodConfig classMethodConfig) {
-		ClassPool pool = getClassPool(loader);
+		ClassPool pool = ProxyUtil.getClassPool(loader);
 		CtClass cls = null;
 		try {
 			cls = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
