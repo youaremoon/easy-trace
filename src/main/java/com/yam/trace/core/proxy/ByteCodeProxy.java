@@ -182,7 +182,7 @@ public class ByteCodeProxy implements IInterceptProxy {
 							posId, traceBefore, true, true, false));
 					method.insertAfter(createInterceptCall(method, 
 							TraceEntry.TRACE_DEFAULT_INSTANCE + "." + TraceEntry.TRACE_STATIC_METHOD_AFTER_PREFIX, 
-							posId, traceAfter, true, true, true));
+							posId, traceAfter, true, true, true), true);
 					intercept = true;
 				}
 			} else {
@@ -195,7 +195,7 @@ public class ByteCodeProxy implements IInterceptProxy {
 							posId, traceBefore, true, false, false));
 					method.insertAfter(createInterceptCall(method, 
 							INSTANCE_METHOD_NAME + "()." + TraceEntry.TRACE_METHOD_AFTER_PREFIX,
-							posId, traceAfter, true, false, true));
+							posId, traceAfter, true, false, true), true);
 					intercept = true;
 				}
 			}
