@@ -20,6 +20,8 @@ FilePerThreadTraceRecord: 每个线程记录自己的trace信息，路径为./lo
 2、在源码目录（如src/main/resources)下增加easy-trace.xml文件，并根据你要分析的应用进行配置；
 
 3、启动应用时：java -javaagent:{easy trace jar path}\easy-trace-0.0.1-SNAPSHOT.jar -jar {your jar}。
+如果需要调试jdk的类则需要加：
+-Xbootclasspath/a:"{你的路径}\javassist-3.20.0-GA.jar;{你的路径}\easy-trace-0.0.1-SNAPSHOT.jar"
 
 注意：该版本目前主要用来查看执行路径，方便源码分析，如果需要收集性能数据需要进行扩展。
 
