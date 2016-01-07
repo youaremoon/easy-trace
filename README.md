@@ -50,7 +50,7 @@ FilePerThreadTraceRecord: 每个线程记录自己的trace信息，路径为./lo
 				<!-- 不配置表示所有点都关注,半角逗号分隔,可以配置的范围: CONSTRUCTOR,METHOD_BEFORE,METHOD_AFTER,STATIC_BEFORE,STATIC_AFTER -->
 				<interst>ONSTRUCTOR,METHOD_BEFORE,METHOD_AFTER,STATIC_BEFORE,STATIC_AFTER</interst>
 				<!-- 可以将生产的class输出到该目录下,用反编译工具查看: 如D:\code -->
-				<wirte-file></wirte-file>
+				<write-file></write-file>
 			</class-method>
 		</include-user-class>
 	</class-methods>

@@ -7,6 +7,9 @@
  */
 package com.yam.trace.core.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
@@ -70,11 +73,25 @@ public class EastTraceConfigManager {
 	
 	private void loadConfigFromXml() {
 		String configPath = System.getProperty(SYSTEM_CONFIG_PATH_PARAM, ESAY_TRACE_XML);
-		InputStream is = ClassMethodsConfig.class.getResourceAsStream(configPath);
-		if (null == is) {
-			TraceLogger.printWarnToConsole("cannot find config file: " + configPath + ", use default config.", true);
-			return;
+		File configFile = new File(configPath);
+		
+		InputStream is = null;
+		if (configFile.exists() && configFile.isFile()) {
+			try {
+				is = new FileInputStream(configFile);
+			} catch (FileNotFoundException e1) {
+				TraceLogger.printWarnToConsole("cannot find config file: " + configFile.getAbsolutePath() + ", use default config.", true);
+				return;
+			}
+		} else {
+			is = EastTraceConfigManager.class.getResourceAsStream(configPath);
+			if (null == is) {
+				TraceLogger.printWarnToConsole("cannot find config file: " + configPath + ", use default config.", true);
+				return;
+			}
 		}
+		
+		
 		
 		// 尽量少依赖外部类，因此用原始java的xml解析
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance(); 
