@@ -23,6 +23,7 @@ import javassist.Modifier;
 import javassist.NotFoundException;
 
 import com.yam.trace.core.config.ClassMethodConfig;
+import com.yam.trace.core.config.ClassMethodConfig.VisitScope;
 import com.yam.trace.core.trace.TraceEntry;
 import com.yam.trace.core.util.PatternUtil;
 import com.yam.trace.core.util.TraceLogger;
@@ -249,6 +250,21 @@ public class ByteCodeProxy implements IInterceptProxy {
 			// 抽象方法不能代理
 			return false;
 		} else if (EXCLUDE_METHODS.contains(method.getName())) {
+			return false;
+		}
+		
+		// 访问范围判断
+		VisitScope scope;
+		if (Modifier.isPackage(modifiers)) {
+			scope = VisitScope.PACK;
+		} else if (Modifier.isPrivate(modifiers)) {
+			scope = VisitScope.PRIVATE;
+		} else if (Modifier.isProtected(modifiers)) {
+			scope = VisitScope.PROTECTED;
+		} else {
+			scope = VisitScope.PUBLIC;
+		}
+		if (!classMethodConfig.canVisit(scope)) {
 			return false;
 		}
 		

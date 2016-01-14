@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.yam.trace.core.config.ClassMethodConfig.Interst;
+import com.yam.trace.core.config.ClassMethodConfig.VisitScope;
 import com.yam.trace.core.util.TraceLogger;
 
 /**
@@ -35,6 +36,7 @@ public class ClassMethodsConfigParser extends AbstractXmlConfigParser<ClassMetho
 	private static final String CLASS_PATTERN = "class-regex";
 	private static final String METHOD_PATTERN = "method-regex";
 	private static final String INTERST = "interst";
+	private static final String VISIT_SCOPE = "visit-scope";
 	private static final String WRITE_FILE = "write-file";
 	
 	@Override
@@ -101,18 +103,15 @@ public class ClassMethodsConfigParser extends AbstractXmlConfigParser<ClassMetho
 				ii.setMethodRegex(text);
 				hasSet = true;
 			} else if (INTERST.equals(nodeName)) {
-				String[] intersts = text.split(",");
-				Set<Interst> interstSet = new HashSet<Interst>();
-				for (String interst : intersts) {
-					try {
-						interstSet.add(ClassMethodConfig.Interst.valueOf(interst));
-					} catch (Exception ex) {
-						TraceLogger.printToConsole("not right config:" + interst, ex);
-					}
-				}
-				
+				Set<Interst> interstSet = parseSet(text, ClassMethodConfig.Interst.class);
 				if (!interstSet.isEmpty()) {
 					ii.setInterstSet(interstSet);
+					hasSet = true;
+				}
+			} else if (VISIT_SCOPE.equals(nodeName)) {
+				Set<VisitScope> visitScopeSet = parseSet(text, ClassMethodConfig.VisitScope.class);
+				if (!visitScopeSet.isEmpty()) {
+					ii.setVisitScopeSet(visitScopeSet);
 					hasSet = true;
 				}
 			} else if (WRITE_FILE.equals(nodeName)) {
@@ -122,6 +121,20 @@ public class ClassMethodsConfigParser extends AbstractXmlConfigParser<ClassMetho
 		}
 		
 		return hasSet ? ii : null;
+	}
+	
+	private <T extends Enum<T>> Set<T> parseSet(String value, Class<T> cls) {
+		String[] vals = value.split(",");
+		Set<T> valSet = new HashSet<T>();
+		for (String val : vals) {
+			try {
+				valSet.add(Enum.valueOf(cls, val));
+			} catch (Exception ex) {
+				TraceLogger.printToConsole("not right config:" + val, ex);
+			}
+		}
+		
+		return valSet;
 	}
 
 	@Override

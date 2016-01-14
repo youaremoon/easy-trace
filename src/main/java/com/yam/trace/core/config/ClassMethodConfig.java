@@ -24,6 +24,7 @@ public class ClassMethodConfig {
 	private String classRegex;
 	private String methodRegex;
 	private Set<Interst> interstSet;
+	private Set<VisitScope> visitScopeSet;
 	private String writeFile;
 	
 	public static enum Interst {
@@ -49,6 +50,25 @@ public class ClassMethodConfig {
 		STATIC_AFTER
 	}
 	
+	public static enum VisitScope {
+		/**
+		 * 私有
+		 */
+		PRIVATE,
+		/**
+		 * 公共
+		 */
+		PUBLIC,
+		/**
+		 * 
+		 */
+		PROTECTED,
+		/**
+		 * 包级别
+		 */
+		PACK
+	}
+	
 	/**
 	 * 是否关注指定类型的方法
 	 * @param interst
@@ -60,6 +80,19 @@ public class ClassMethodConfig {
 		}
 		
 		return interstSet.contains(interst);
+	}
+	
+	/**
+	 * 是否访问对应访问权限的方法
+	 * @param visitScope
+	 * @return
+	 */
+	public boolean canVisit(VisitScope visitScope) {
+		if (null == visitScopeSet || visitScopeSet.isEmpty()) {
+			return true;
+		}
+		
+		return visitScopeSet.contains(visitScope);
 	}
 	
 	public String getClassRegex() {
@@ -86,6 +119,14 @@ public class ClassMethodConfig {
 		this.interstSet = interstSet;
 	}
 	
+	public Set<VisitScope> getVisitScopeSet() {
+		return visitScopeSet;
+	}
+
+	public void setVisitScopeSet(Set<VisitScope> visitScopeSet) {
+		this.visitScopeSet = visitScopeSet;
+	}
+
 	public String getWriteFile() {
 		return writeFile;
 	}

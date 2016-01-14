@@ -24,6 +24,8 @@
 				<interst></interst>
 				<!-- 可以将生产的class输出到该目录下,用反编译工具查看: 如D:\\code -->
 				<write-file></write-file>
+				<!-- 不配置表示所有权限的方法都关注，半角逗号分隔，可以配置的范围：PRIVATE,PROTECTED,PUBLIC,PACK -->
+				<visit-scope></visit-scope>
 			</class-method>
 		</include-user-class>
 	</class-methods>
