@@ -37,18 +37,26 @@ public class EasyTraceTransformer implements ClassFileTransformer {
 		// 获取拦截配置信息
 		ClassMethodConfig classMethodConfig = ClassMethodConfigSearch.searchFor(className);
 		if (null == classMethodConfig) {
-			return classfileBuffer;
+			return null;
 		}
 		
 		// 生成代理类
 		for (int i = 0; i < proxys.length; i++) {
 			byte[] result = proxys[i].proxyFor(loader, protectionDomain, className, classfileBuffer, classMethodConfig);
-			if (null != result) {
-				return result;
+			// 创建失败时尝试用下一个代理生成
+			if (null == result) {
+				continue;
 			}
+			
+			// 不生成代理的情况
+			if (IInterceptProxy.NOT_PROXY == result || result.length == 0) {
+				return null;
+			}
+			
+			return result;
 		}
 		
-		// 生成失败则返回原信息
-		return classfileBuffer;
+		// 生成失败则返回空
+		return null;
 	}
 }

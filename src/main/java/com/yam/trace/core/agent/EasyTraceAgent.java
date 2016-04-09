@@ -19,7 +19,7 @@ import com.yam.trace.core.util.TraceLogger;
  */
 public class EasyTraceAgent {
 	public static void premain(String args, Instrumentation inst){  
-		TraceLogger.printToConsole("Easy Agent start!", true);  
+		TraceLogger.printToConsole("Easy Agent start!", true);
         inst.addTransformer(new EasyTraceTransformer());  
     }
 }

@@ -35,6 +35,8 @@ import com.yam.trace.core.util.TraceLogger;
  *
  */
 public class ByteCodeProxy implements IInterceptProxy {
+	private static final String EASY_TRACE_TAG_FIELD = "$easyTraceTagField";
+	private static final String EASY_TRACE_TAG_FIELD_SRC = "private byte " + EASY_TRACE_TAG_FIELD + ";";
 	private static final String INSTANCE_FIELD_NAME = "$interceptEntry";
 	private static final String INSTANCE_METHOD_NAME = "$getInterceptEntry";
 	private static final String INSTANCE_FIELD_SRC = String.format("private %s %s;", 
@@ -65,10 +67,12 @@ public class ByteCodeProxy implements IInterceptProxy {
 		try {
 			cls = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
 			if (!canProxy(cls)) {
-				return classfileBuffer;
+				return NOT_PROXY;
 			}
 			
-			addTraceEntry(cls);
+			if (!addTraceEntry(cls)) {
+				return NOT_PROXY;
+			}
 
 			// 拦截构造方法
 			boolean interceptConstructor = interceptConstructor(cls, classMethodConfig);
@@ -100,16 +104,32 @@ public class ByteCodeProxy implements IInterceptProxy {
 		return null;
 	}
 	
-	private void addTraceEntry(CtClass cls) throws CannotCompileException {
-		CtMethod[] ms = cls.getMethods();
+	/**
+	 * 添加TraceEntry相关字段
+	 * @param cls
+	 * @return 返回false表示添加失败（已经添加过）
+	 * @throws CannotCompileException
+	 */
+	private boolean addTraceEntry(CtClass cls) throws CannotCompileException {
+		try {
+			cls.getDeclaredField(EASY_TRACE_TAG_FIELD);
+			// 执行到这里说明之前添加过，就不再添加了
+			return false;
+		} catch (NotFoundException e) {
+		}
 		
+		// 添加一个标记字段，表示该类已经被处理过
+		CtField tagField = CtField.make(EASY_TRACE_TAG_FIELD_SRC, cls);
+		cls.addField(tagField);
+		
+		CtMethod[] ms = cls.getMethods();
 		// 如果父类中存在，且能访问则不用再加
 		try {
 			for (CtMethod m : ms) {
 				int modifiers = m.getModifiers();
 				if (INSTANCE_METHOD_NAME.equals(m.getName()) && m.getParameterTypes().length == 0
 						&& (Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers))) {
-					return;
+					return true;
 				}
 			}
 		} catch (NotFoundException e) {
@@ -123,6 +143,8 @@ public class ByteCodeProxy implements IInterceptProxy {
 		// 添加方法
 		CtMethod m = CtMethod.make(INSTANCE_METHOD_SRC, cls);
 		cls.addMethod(m);
+		
+		return true;
 	}
 	
 	/**
