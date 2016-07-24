@@ -169,7 +169,7 @@ public class ByteCodeProxy implements IInterceptProxy {
 			
 //			cc.insertBefore(createInterceptCall(cc, InterceptEntry.INTERCEPT_CONSTRUCTOR_BEFORE_PREFIX, false, true));
 			cc.insertAfter(createInterceptCall(cc, INSTANCE_METHOD_NAME + "()." + TraceEntry.TRACE_CONSTRUCTOR_AFTER_PREFIX, 
-					ProxyUtil.newPosId(), true, false, false, false), true);
+					true, true, false, false), true);
 			
 			intercept = true;
 		}
@@ -199,26 +199,24 @@ public class ByteCodeProxy implements IInterceptProxy {
 				boolean traceBefore = classMethodConfig.interstAt(ClassMethodConfig.Interst.STATIC_BEFORE);
 				boolean traceAfter = classMethodConfig.interstAt(ClassMethodConfig.Interst.STATIC_AFTER);
 				if (traceBefore || traceAfter) {
-					int posId = ProxyUtil.newPosId();
 					method.insertBefore(createInterceptCall(method, 
 							TraceEntry.TRACE_DEFAULT_INSTANCE + "." + TraceEntry.TRACE_STATIC_METHOD_BEFORE_PREFIX, 
-							posId, traceBefore, true, true, false));
+							traceBefore, false, true, false));
 					method.insertAfter(createInterceptCall(method, 
 							TraceEntry.TRACE_DEFAULT_INSTANCE + "." + TraceEntry.TRACE_STATIC_METHOD_AFTER_PREFIX, 
-							posId, traceAfter, true, true, true), true);
+							traceAfter, false, true, true), true);
 					intercept = true;
 				}
 			} else {
 				boolean traceBefore = classMethodConfig.interstAt(ClassMethodConfig.Interst.METHOD_BEFORE);
 				boolean traceAfter = classMethodConfig.interstAt(ClassMethodConfig.Interst.METHOD_AFTER);
 				if (traceBefore || traceAfter) {
-					int posId = ProxyUtil.newPosId();
 					method.insertBefore(createInterceptCall(method, 
 							INSTANCE_METHOD_NAME + "()." + TraceEntry.TRACE_METHOD_BEFORE_PREFIX,
-							posId, traceBefore, true, false, false));
+							traceBefore, false, false, false));
 					method.insertAfter(createInterceptCall(method, 
 							INSTANCE_METHOD_NAME + "()." + TraceEntry.TRACE_METHOD_AFTER_PREFIX,
-							posId, traceAfter, true, false, true), true);
+							traceAfter, false, false, true), true);
 					intercept = true;
 				}
 			}
@@ -227,17 +225,23 @@ public class ByteCodeProxy implements IInterceptProxy {
 		return intercept;
 	}
 	
-	private String createInterceptCall(CtBehavior behavior, String prefix, int posId, boolean trace, boolean needMethodName, boolean isStatic, boolean needResult)
-			throws NotFoundException {
+	private String createInterceptCall(CtBehavior behavior, String prefix, boolean trace, boolean isConstructor, boolean isStatic, boolean isReturn)
+			throws NotFoundException, CannotCompileException {
 		StringBuilder sb = new StringBuilder();
-
+		
+		if (!isConstructor) {
+			if (!isReturn) {
+				behavior.useCflow("recursion");
+			}
+			
+			// 递归时只记录第一层
+			sb.append("if ($cflow(recursion) == 0)");
+		}
+		
 		// 添加前缀-调用语句的语句
 		sb.append(prefix);
-		
-		// 加入位置id
-		sb.append(posId);
 		// trace
-		sb.append(",").append(trace);
+		sb.append(trace);
 		
 		// 实例传this, 否则传class
 		if (isStatic) {
@@ -247,14 +251,14 @@ public class ByteCodeProxy implements IInterceptProxy {
 		}
 		
 		// 构造方法不需要methodName
-		if (needMethodName) {
+		if (!isConstructor) {
 			sb.append(", \"").append(behavior.getMethodInfo().toString()).append("\"");
 		}
 		
 		// 传入方法调用时的传参
 		sb.append(", $args");
 		// 结果
-		if (needResult) {
+		if (isReturn) {
 			// $w的作用是把基础类型转换为包装类型，如果不是基础类型则忽略
 			sb.append(", ($w)$_");
 		}
